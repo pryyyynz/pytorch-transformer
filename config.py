@@ -7,9 +7,9 @@ def get_config():
         "lr": 10**-4,
         "seq_len": 350,
         "d_model": 512,
-        "datasource": 'opus_books',
+        "datasource": 'custom_en_twi',  # Changed from 'opus_books'
         "lang_src": "en",
-        "lang_tgt": "it",
+        "lang_tgt": "tw",  # Changed from 'it' to 'tw'
         "model_folder": "weights",
         "model_basename": "tmodel_",
         "preload": "latest",
