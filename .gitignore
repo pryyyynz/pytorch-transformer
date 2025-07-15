@@ -7,3 +7,6 @@ weights/
 wandb/
 
 datasets/
+
+.DS_Store
+custom_en_twi_weights/
