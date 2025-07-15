@@ -2,7 +2,7 @@ from model import build_transformer
 from dataset import BilingualDataset, causal_mask
 from config import get_config, get_weights_file_path, latest_weights_file_path
 
-import torchtext.datasets as datasets
+# import torchtext.datasets as datasets
 import torch
 import torch.nn as nn
 from torch.utils.data import Dataset, DataLoader, random_split
@@ -91,7 +91,8 @@ def run_validation(model, validation_ds, tokenizer_src, tokenizer_tgt, max_len, 
             source_text = batch["src_text"][0]
             target_text = batch["tgt_text"][0]
             model_out_text = tokenizer_tgt.decode(
-                model_out.detach().cpu().numpy())
+                model_out.detach().cpu().tolist())
+                # model_out.detach().cpu().numpy())
 
             source_texts.append(source_text)
             expected.append(target_text)
@@ -112,19 +113,19 @@ def run_validation(model, validation_ds, tokenizer_src, tokenizer_tgt, max_len, 
         # Compute the char error rate
         metric = torchmetrics.CharErrorRate()
         cer = metric(predicted, expected)
-        writer.add_scalar('validation cer', cer, global_step)
+        writer.add_scalar('validation cer', cer.item(), global_step)
         writer.flush()
 
         # Compute the word error rate
         metric = torchmetrics.WordErrorRate()
         wer = metric(predicted, expected)
-        writer.add_scalar('validation wer', wer, global_step)
+        writer.add_scalar('validation wer', wer.item(), global_step)
         writer.flush()
 
         # Compute the BLEU metric
         metric = torchmetrics.BLEUScore()
         bleu = metric(predicted, expected)
-        writer.add_scalar('validation BLEU', bleu, global_step)
+        writer.add_scalar('validation BLEU', bleu.item(), global_step)
         writer.flush()
 
 
@@ -154,8 +155,8 @@ def load_custom_dataset(config):
     Load custom English-Twi dataset from the datasets directory
     """
     # Define file paths
-    en_file = Path('datasets/english')
-    tw_file = Path('datasets/twi')
+    en_file = Path('datasets/english_clean.txt')
+    tw_file = Path('datasets/twi_clean.txt')
 
     # Check if files exist
     if not en_file.exists() or not tw_file.exists():
@@ -188,19 +189,34 @@ def load_custom_dataset(config):
     return dataset
 
 
+def load_validation_dataset(config):
+    # Read validation files
+    with open('datasets/english_clean_val.txt', 'r', encoding='utf-8') as f:
+        english_lines = [line.strip() for line in f if line.strip()]
+    
+    with open('datasets/twi_clean_val.txt', 'r', encoding='utf-8') as f:
+        twi_lines = [line.strip() for line in f if line.strip()]
+    
+    # Create dataset format
+    dataset = []
+    for en, tw in zip(english_lines, twi_lines):
+        dataset.append({
+            'translation': {
+                'en': en,
+                'tw': tw
+            }
+        })
+    
+    return dataset
+
 def get_ds(config):
     # Load custom English-Twi dataset instead of using Hugging Face datasets
-    ds_raw = load_custom_dataset(config)
-
-    # Build tokenizers
-    tokenizer_src = get_or_build_tokenizer(config, ds_raw, config['lang_src'])
-    tokenizer_tgt = get_or_build_tokenizer(config, ds_raw, config['lang_tgt'])
-
-    # Keep 90% for training, 10% for validation
-    train_ds_size = int(0.9 * len(ds_raw))
-    val_ds_size = len(ds_raw) - train_ds_size
-    train_ds_raw, val_ds_raw = random_split(
-        ds_raw, [train_ds_size, val_ds_size])
+    train_ds_raw = load_custom_dataset(config)
+    val_ds_raw = load_validation_dataset(config)
+    
+    # Build tokenizers from training data only
+    tokenizer_src = get_or_build_tokenizer(config, train_ds_raw, config['lang_src'])
+    tokenizer_tgt = get_or_build_tokenizer(config, train_ds_raw, config['lang_tgt'])
 
     train_ds = BilingualDataset(train_ds_raw, tokenizer_src, tokenizer_tgt,
                                 config['lang_src'], config['lang_tgt'], config['seq_len'])
@@ -211,7 +227,7 @@ def get_ds(config):
     max_len_src = 0
     max_len_tgt = 0
 
-    for item in ds_raw:
+    for item in train_ds_raw:
         src_ids = tokenizer_src.encode(
             item['translation'][config['lang_src']]).ids
         tgt_ids = tokenizer_tgt.encode(
