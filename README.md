@@ -8,7 +8,7 @@ Download the dataset from: https://www.kaggle.com/datasets/azunre/twi-dataset
 
 ## Requirements
 
-- Python 3.8+
+- Python 3.9+
 - PyTorch 2.0+
 - CUDA-capable GPU (recommended: 16GB+ VRAM)
 - Required packages:
@@ -23,7 +23,7 @@ Download the dataset from: https://www.kaggle.com/datasets/azunre/twi-dataset
 
 1. **Clone the repository**
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/pryyyynz/pytorch-transformer
    cd pytorch-transformer
    ```
 
@@ -149,12 +149,6 @@ tensorboard --logdir=runs
 - For GPUs with <16GB VRAM, reduce `batch_size` to 8 or 4
 - Enable gradient accumulation for effective larger batch sizes
 
-## Troubleshooting
-
-- **Out of Memory**: Reduce `batch_size` or `seq_len` in `config.py`
-- **Slow Training**: Ensure CUDA is available: `python -c "import torch; print(torch.cuda.is_available())"`
-- **Data Issues**: Check that English and Twi files have the same number of lines
-
 ## Citation
 
 If you use this code, please cite the original Twi dataset:
@@ -162,7 +156,7 @@ If you use this code, please cite the original Twi dataset:
 @dataset{azunre_twi_dataset,
   author = {Azunre, Paul},
   title = {Twi Dataset},
-  year = {2023},
+  year = {2021},
   publisher = {Kaggle},
   url = {https://www.kaggle.com/datasets/azunre/twi-dataset}
 }
