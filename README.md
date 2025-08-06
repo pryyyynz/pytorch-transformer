@@ -100,14 +100,64 @@ If training on a remote server:
 
 ## Inference
 
-To translate text using the trained model:
-```python
-from translate import translate
+After training the model, you can use `translate.py` to translate text from English to Twi. The script uses the latest trained model checkpoint from `custom_en_twi_weights/` and the saved tokenizers.
 
-# Load the model (uses latest checkpoint by default)
-text = "Hello, how are you?"
-translation = translate(text)
-print(translation)
+### Running translate.py
+
+The translation script supports three modes:
+
+#### 1. Interactive Mode (Default)
+Run without arguments for an interactive translation session:
+```bash
+python translate.py
+```
+- Enter English text when prompted
+- Type `quit` to exit
+- Type `random` to see random validation examples
+
+#### 2. Command Line Mode
+Translate a specific sentence directly from the command line:
+```bash
+python translate.py "Hello, how are you?"
+```
+Output:
+```
+Source: Hello, how are you?
+Translation: [Twi translation]
+```
+
+#### 3. Random Validation Testing
+Test the model on random sentences from the validation set:
+```bash
+# Translate 5 random validation sentences (default)
+python translate.py --random
+
+# Translate 10 random validation sentences
+python translate.py --random 10
+```
+This shows the source (English), target (ground truth Twi), and predicted translations.
+
+### Requirements for Inference
+
+Before running `translate.py`, ensure you have:
+1. Trained model weights in `custom_en_twi_weights/` (e.g., `tmodel_20.pt`)
+2. Tokenizer files: `tokenizer_en.json` and `tokenizer_tw.json`
+3. (Optional) Validation data in `datasets/` for random testing
+
+### Python API Usage
+
+You can also use the translation functionality in your own Python code:
+```python
+from translate import load_model_and_tokenizers, translate_sentence
+
+# Load the model once
+model, tokenizer_src, tokenizer_tgt, config, device = load_model_and_tokenizers()
+
+# Translate multiple sentences
+sentences = ["Hello world", "How are you?", "Good morning"]
+for sentence in sentences:
+    translation = translate_sentence(sentence, model, tokenizer_src, tokenizer_tgt, config, device)
+    print(f"{sentence} -> {translation}")
 ```
 
 ## Model Architecture
