@@ -10,3 +10,9 @@ datasets/
 
 .DS_Store
 custom_en_twi_weights/
+
+# Environment variables
+.env
+*.env
+.env.local
+.env.production

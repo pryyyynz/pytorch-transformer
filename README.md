@@ -1,6 +1,6 @@
 # PyTorch Transformer for English-Twi Translation
 
-A PyTorch implementation of a transformer model for English to Twi language translation.
+A PyTorch implementation of a transformer model for English to Twi language translation with web interface, speech capabilities, and interactive notebooks.
 
 ## Dataset
 
@@ -11,13 +11,18 @@ Download the dataset from: https://www.kaggle.com/datasets/azunre/twi-dataset
 - Python 3.9+
 - PyTorch 2.0+
 - CUDA-capable GPU (recommended: 16GB+ VRAM)
-- Required packages:
+- Required packages (see `requirements.txt`):
   ```bash
-  pip install torch torchvision torchaudio
-  pip install tokenizers datasets
-  pip install tqdm tensorboard
-  pip install pandas numpy
+  pip install -r requirements.txt
   ```
+
+Key dependencies include:
+- PyTorch ecosystem (torch, torchvision, torchaudio, torchtext)
+- Hugging Face libraries (datasets, tokenizers)
+- ML tools (tensorboard, wandb, torchmetrics)
+- Web interface (flask, flask-cors)
+- Speech capabilities (openai-whisper, gTTS)
+- Scientific computing (numpy, scipy)
 
 ## Project Setup
 
@@ -55,8 +60,17 @@ Download the dataset from: https://www.kaggle.com/datasets/azunre/twi-dataset
    - Save cleaned files to `datasets/`
 
 4. **Train the model**
+   
+   Choose one of the training options:
+   
+   **Option A: Standard Training**
    ```bash
    python train.py
+   ```
+   
+   **Option B: Training with Weights & Biases Logging**
+   ```bash
+   python train_wb.py
    ```
 
    The training script will:
@@ -64,7 +78,34 @@ Download the dataset from: https://www.kaggle.com/datasets/azunre/twi-dataset
    - Create the transformer model
    - Train for 30 epochs (configurable in `config.py`)
    - Save checkpoints to `custom_en_twi_weights/`
-   - Log training metrics to TensorBoard
+   - Log training metrics to TensorBoard (train.py) or Weights & Biases (train_wb.py)
+
+## Training Options
+
+### 1. Local Training (train.py)
+Standard training with TensorBoard logging:
+```bash
+python train.py
+```
+
+### 2. Weights & Biases Training (train_wb.py)
+Enhanced training with W&B experiment tracking:
+```bash
+python train_wb.py
+```
+This version includes:
+- Comprehensive experiment logging
+- Hyperparameter tracking
+- Model performance visualization
+- Online experiment dashboard
+
+### 3. Jupyter Notebook Training
+Interactive training and experimentation:
+- `Local_Train.ipynb` - Local environment training
+- `Colab_Train.ipynb` - Google Colab training
+- `Inference.ipynb` - Model inference and testing
+- `attention_visual.ipynb` - Attention mechanism visualization
+- `Beam_Search.ipynb` - Beam search implementation
 
 ## Configuration
 
@@ -75,28 +116,38 @@ Edit `config.py` to adjust training parameters:
 - `seq_len`: 350 (maximum sequence length)
 - `d_model`: 512 (model dimension)
 
-## Training on Remote GPU
+## Web Interface
 
-If training on a remote server:
+The project includes a Flask-based web application with speech capabilities:
 
-1. **Upload files to server**
+### Features
+- **Text Translation**: English to Twi text translation
+- **Speech-to-Text**: Upload audio files for transcription using OpenAI Whisper
+- **Text-to-Speech**: Generate audio from translated text using Google TTS
+- **Interactive UI**: Modern web interface with real-time translation
+
+### Running the Web Interface
+
+1. **Start the Flask server**
    ```bash
-   scp -r . user@server:~/pytorch-transformer/
+   cd UI
+   python app.py
    ```
 
-2. **SSH into server and run training**
-   ```bash
-   ssh user@server
-   cd pytorch-transformer
-   python train.py
-   ```
+2. **Access the web interface**
+   Open your browser and navigate to: `http://localhost:5005`
 
-3. **Download trained models**
-   ```bash
-   # From local machine
-   scp user@server:~/pytorch-transformer/custom_en_twi_weights/*.pt ./custom_en_twi_weights/
-   scp user@server:~/pytorch-transformer/tokenizer_*.json ./
-   ```
+### Web Interface Features
+- Upload audio files (wav, mp3, mp4, m4a, ogg, webm) for speech-to-text
+- Real-time text translation
+- Download translated text as audio
+- Responsive design for mobile and desktop
+
+### API Endpoints
+- `POST /translate` - Translate text
+- `POST /speech-to-text` - Convert audio to text
+- `POST /text-to-speech` - Convert text to audio
+- `GET /health` - Health check
 
 ## Inference
 
@@ -160,6 +211,24 @@ for sentence in sentences:
     print(f"{sentence} -> {translation}")
 ```
 
+## Interactive Development
+
+### Jupyter Notebooks
+The project includes several Jupyter notebooks for interactive development:
+
+1. **Local_Train.ipynb** - Complete training pipeline for local environment
+2. **Colab_Train.ipynb** - Google Colab optimized training
+3. **Inference.ipynb** - Model inference and testing examples
+4. **attention_visual.ipynb** - Attention mechanism visualization
+5. **Beam_Search.ipynb** - Beam search decoding implementation
+
+### Environment Setup
+For conda users, use the provided environment file:
+```bash
+conda create --name transformer --file conda.txt
+conda activate transformer
+```
+
 ## Model Architecture
 
 - Transformer architecture with:
@@ -174,23 +243,56 @@ for sentence in sentences:
 ```
 pytorch-transformer/
 ├── config.py           # Training configuration
-├── train.py           # Main training script
+├── train.py           # Main training script (TensorBoard)
+├── train_wb.py        # Training with Weights & Biases
 ├── model.py           # Transformer model implementation
 ├── dataset.py         # Dataset and data loading
 ├── clean_dataset.py   # Data preprocessing script
-├── tokenizer.py       # Tokenizer utilities
-├── translate.py       # Inference script
+├── translate.py       # Command-line inference script
+├── requirements.txt   # Python dependencies
+├── conda.txt         # Conda environment specification
 ├── datasets/          # Raw and cleaned data
 ├── custom_en_twi_weights/  # Model checkpoints
-└── tokenizer_*.json   # Saved tokenizers
+├── tokenizer_*.json   # Saved tokenizers
+├── cache/            # Model and tokenizer cache
+├── UI/               # Web interface
+│   ├── app.py        # Flask application
+│   ├── translate.py  # Translation utilities
+│   ├── static/       # CSS and JavaScript
+│   ├── templates/    # HTML templates
+│   └── temp_audio/   # Temporary audio files
+├── Local_Train.ipynb     # Local training notebook
+├── Colab_Train.ipynb     # Google Colab notebook
+├── Inference.ipynb      # Inference examples
+├── attention_visual.ipynb # Attention visualization
+└── Beam_Search.ipynb    # Beam search implementation
 ```
 
 ## Monitoring Training
 
-View training progress with TensorBoard:
+### TensorBoard (train.py)
 ```bash
 tensorboard --logdir=runs
 ```
+
+### Weights & Biases (train_wb.py)
+Visit your W&B dashboard after starting training to monitor:
+- Loss curves
+- Validation metrics
+- Hyperparameter tracking
+- Model performance comparisons
+
+## Speech Features
+
+### Speech-to-Text
+- Powered by OpenAI Whisper
+- Supports multiple audio formats
+- Automatic transcription for translation input
+
+### Text-to-Speech
+- Uses Google Text-to-Speech (gTTS)
+- Generates audio for translated text
+- Fallback to English voice for Twi text
 
 ## Performance Tips
 

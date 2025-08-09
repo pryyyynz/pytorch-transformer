@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>English to Twi Translator</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-language"></i> English to Twi Translator</h1>
+        </header>
+
+        <div class="translator-container">
+            <div class="input-section">
+                <div class="section-header">
+                    <h3><i class="fas fa-keyboard"></i> English Text</h3>
+                    <button id="clearBtn" class="icon-btn" title="Clear text">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <textarea 
+                    id="inputText" 
+                    placeholder="Enter English text here or use the microphone to record speech..."
+                    rows="8"
+                ></textarea>
+                <div class="char-count">
+                    <span id="charCount">0</span> characters
+                    <div class="audio-controls">
+                        <button id="recordBtn" class="icon-btn record-btn" title="Record speech">
+                            <i class="fas fa-microphone"></i>
+                        </button>
+                        <div id="recordingStatus" class="recording-status" style="display: none;">
+                            <div class="recording-indicator">
+                                <div class="pulse"></div>
+                                <span>Recording...</span>
+                            </div>
+                            <button id="stopRecordBtn" class="icon-btn stop-btn" title="Stop recording">
+                                <i class="fas fa-stop"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <!-- Speech transcription editing area -->
+                <div id="speechEditor" class="speech-editor" style="display: none;">
+                    <div class="editor-header">
+                        <h4><i class="fas fa-edit"></i> Edit Transcribed Speech</h4>
+                        <div class="editor-actions">
+                            <button id="acceptSpeechBtn" class="accept-btn" title="Accept and use transcription">
+                                <i class="fas fa-check"></i> Accept
+                            </button>
+                            <button id="cancelSpeechBtn" class="cancel-btn" title="Cancel transcription">
+                                <i class="fas fa-times"></i> Cancel
+                            </button>
+                        </div>
+                    </div>
+                    <textarea 
+                        id="speechText" 
+                        placeholder="Transcribed speech will appear here..."
+                        rows="3"
+                    ></textarea>
+                    <div class="editor-info">
+                        <i class="fas fa-info-circle"></i>
+                        Edit the transcribed text above if needed, then click "Accept" to use it for translation.
+                    </div>
+                </div>
+            </div>
+
+            <div class="translate-section">
+                <button id="translateBtn" class="translate-btn">
+                    <i class="fas fa-exchange-alt"></i>
+                    <span>Translate</span>
+                </button>
+            </div>
+
+            <div class="output-section">
+                <div class="section-header">
+                    <h3><i class="fas fa-comment-dots"></i> Twi Translation</h3>
+                    <div class="output-actions">
+                        <button id="speakBtn" class="icon-btn" title="Listen to translation">
+                            <i class="fas fa-volume-up"></i>
+                        </button>
+                        <button id="copyBtn" class="icon-btn" title="Copy translation">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                </div>
+                <div id="outputText" class="output-text">
+                    <p class="placeholder-text">Translation will appear here...</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="examples-section">
+            <h3><i class="fas fa-lightbulb"></i> Try These Examples</h3>
+            <div class="examples-grid">
+                <button class="example-btn" data-text="What is your name?">
+                    What is your name?
+                </button>
+                <button class="example-btn" data-text="Thank you very much">
+                    Thank you very much
+                </button>
+                <button class="example-btn" data-text="Have you been to Ghana before?">
+                    Have you been to Ghana before?
+                </button>
+                <button class="example-btn" data-text="We have always counted the cost">
+                    We have always counted the cost
+                </button>
+                <button class="example-btn" data-text="Finally, the doctor promised to respect my wishes">
+                    Finally, the doctor promised to respect my wishes
+                </button>
+                <button class="example-btn" data-text="The Bible is full of experiences and stories about people">
+                    The Bible is full of experiences and stories about people
+                </button>
+            </div>
+        </div>
+
+        <footer>
+            <div class="footer-content">
+                <p>Built with <i class="fas fa-heart"></i> for Ghana</p>
+                <div class="footer-links">
+                    <a href="https://github.com/pryyyynz/pytorch-transformer" class="footer-link">
+                        <i class="fab fa-github"></i> GitHub
+                    </a>
+                    <a href="#" class="footer-link">
+                        <i class="fas fa-info-circle"></i> About
+                    </a>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Loading Modal -->
+    <div id="loadingModal" class="modal">
+        <div class="modal-content">
+            <div class="spinner"></div>
+            <p>Translating...</p>
+        </div>
+    </div>
+
+    <!-- About Modal -->
+    <div id="aboutModal" class="modal">
+        <div class="modal-content about-modal">
+            <div class="modal-header">
+                <h2><i class="fas fa-info-circle"></i> About the Translator</h2>
+                <button id="closeAboutModal" class="close-btn"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <h3>How to Use the Translator</h3>
+                <ol>
+                    <li><strong>Enter Text:</strong> Type your English text in the left input box or click one of the example phrases below.</li>
+                    <li><strong>Translate:</strong> Click the "Translate" button in the middle or press Ctrl+Enter to translate.</li>
+                    <li><strong>View Results:</strong> The Twi translation will appear in the right box.</li>
+                    <li><strong>Use the Tools:</strong>
+                        <ul>
+                            <li><i class="fas fa-times"></i> - Clear the input text</li>
+                            <li><i class="fas fa-microphone"></i> - Record speech (if available)</li>
+                            <li><i class="fas fa-volume-up"></i> - Listen to the translation</li>
+                            <li><i class="fas fa-copy"></i> - Copy the translation to clipboard</li>
+                        </ul>
+                    </li>
+                </ol>
+                
+                <h3>About the Project</h3>
+                <p>This English to Twi translator is powered by a PyTorch Transformer neural network. It was trained on a dataset of English-Twi sentence pairs to learn how to translate between these languages.</p>
+                
+                <h3>Limitations</h3>
+                <p>While the translator works well for common phrases and sentences, it may struggle with:</p>
+                <ul>
+                    <li>Very long or complex sentences</li>
+                    <li>Technical terminology</li>
+                    <li>Idiomatic expressions</li>
+                </ul>
+                
+                <p class="tech-info">Built using PyTorch, Transformer architecture, and Flask.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Error Toast -->
+    <div id="errorToast" class="toast error-toast">
+        <i class="fas fa-exclamation-circle"></i>
+        <span id="errorMessage"></span>
+    </div>
+
+    <!-- Success Toast -->
+    <div id="successToast" class="toast success-toast">
+        <i class="fas fa-check-circle"></i>
+        <span>Translation copied to clipboard!</span>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
